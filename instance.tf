@@ -95,9 +95,9 @@ output "public_ip_address" {
 }
 
 output "private_ip_address" {
-    value = aws_instance.private.private_ip
+  value = aws_instance.private.private_ip
 }
 
 output "ami_used_version" {
-    value = aws_instance.public.ami
+  value = aws_instance.public.ami
 }
