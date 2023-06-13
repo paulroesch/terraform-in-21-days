@@ -1,7 +1,7 @@
 resource "aws_vpc" "main" {
   cidr_block = var.vpc_cidr
   tags = {
-    Name = "main"
+    Name = "${var.env_code}-main"
   }
 }
 
@@ -17,7 +17,7 @@ resource "aws_subnet" "public" {
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    Name = "public${count.index}"
+    Name = "${var.env_code}-public${count.index}"
   }
 }
 
@@ -28,7 +28,7 @@ resource "aws_subnet" "private" {
   cidr_block        = var.private_subnet_cidr[count.index]
   availability_zone = data.aws_availability_zones.available.names[count.index]
   tags = {
-    Name = "private${count.index}"
+    Name = "${var.env_code}-private${count.index}"
   }
 }
 
@@ -36,7 +36,7 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "main"
+    Name = "${var.env_code}-main"
   }
 }
 
@@ -46,7 +46,7 @@ resource "aws_eip" "nat" {
   vpc = true
 
   tags = {
-    Name = "nat${count.index}"
+    Name = "${var.env_code}-nat${count.index}"
   }
 }
 
@@ -55,6 +55,10 @@ resource "aws_nat_gateway" "main" {
 
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = aws_subnet.public[count.index].id
+
+  tags = {
+    name = "${var.env_code}-main${count.index}"
+  }
 }
 
 resource "aws_route_table" "public" {
@@ -66,7 +70,7 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name = "public"
+    Name = "${var.env_code}-public"
   }
 }
 
@@ -81,7 +85,7 @@ resource "aws_route_table" "private" {
   }
 
   tags = {
-    Name = "private${count.index}"
+    Name = "${var.env_code}-private${count.index}"
   }
 }
 
@@ -99,6 +103,10 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private[count.index].id
 }
 
+output "env_code" {
+  value = var.env_code
+}
+
 output "names_of_used_availability_zones" {
-  value = slice(data.aws_availability_zones.available.names,0,length(var.private_subnet_cidr))
+  value = slice(data.aws_availability_zones.available.names, 0, length(var.private_subnet_cidr))
 }
