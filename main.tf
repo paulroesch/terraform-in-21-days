@@ -5,12 +5,16 @@ resource "aws_vpc" "main" {
   }
 }
 
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
 resource "aws_subnet" "public" {
   count = length(var.public_subnet_cidr)
 
   vpc_id            = aws_vpc.main.id
   cidr_block        = var.public_subnet_cidr[count.index]
-  availability_zone = var.availability_zone[count.index]
+  availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
     Name = "public${count.index}"
@@ -22,7 +26,7 @@ resource "aws_subnet" "private" {
 
   vpc_id            = aws_vpc.main.id
   cidr_block        = var.private_subnet_cidr[count.index]
-  availability_zone = var.availability_zone[count.index]
+  availability_zone = data.aws_availability_zones.available.names[count.index]
   tags = {
     Name = "private${count.index}"
   }
@@ -95,6 +99,6 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private[count.index].id
 }
 
-output "function-demo" {
-  value = length(var.availability_zone)
+output "names_of_used_availability_zones" {
+  value = slice(data.aws_availability_zones.available.names,0,length(var.private_subnet_cidr))
 }
