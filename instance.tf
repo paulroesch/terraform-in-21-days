@@ -15,7 +15,7 @@ data "aws_ami" "amazonlinux" {
 }
 
 resource "aws_security_group" "public" {
-  name        = "public"
+  name        = "${var.env_code}-public"
   description = "Allow public traffic"
   vpc_id      = aws_vpc.main.id
 
@@ -24,7 +24,7 @@ resource "aws_security_group" "public" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["102.129.153.163/32"]
+    cidr_blocks = ["102.129.152.166/32"]
   }
 
   egress {
@@ -35,7 +35,7 @@ resource "aws_security_group" "public" {
   }
 
   tags = {
-    Name = "main"
+    Name = "${var.env_code}-public"
   }
 }
 
@@ -48,12 +48,12 @@ resource "aws_instance" "public" {
   associate_public_ip_address = true
 
   tags = {
-    Name = "public"
+    Name = "${var.env_code}-public"
   }
 }
 
 resource "aws_security_group" "private" {
-  name        = "private"
+  name        = "${var.env_code}-private"
   description = "Allow private traffic"
   vpc_id      = aws_vpc.main.id
 
@@ -73,7 +73,7 @@ resource "aws_security_group" "private" {
   }
 
   tags = {
-    Name = "main"
+    Name = "${var.env_code}-private"
   }
 }
 
@@ -85,7 +85,7 @@ resource "aws_instance" "private" {
   key_name               = "main"
 
   tags = {
-    Name = "private"
+    Name = "${var.env_code}-private"
   }
 }
 
@@ -95,9 +95,9 @@ output "public_ip_address" {
 }
 
 output "private_ip_address" {
-    value = aws_instance.private.private_ip
+  value = aws_instance.private.private_ip
 }
 
 output "ami_used_version" {
-    value = aws_instance.public.ami
+  value = aws_instance.public.ami
 }
