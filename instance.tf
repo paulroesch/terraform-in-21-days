@@ -24,7 +24,15 @@ resource "aws_security_group" "public" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["102.129.152.166/32"]
+    cidr_blocks = ["102.129.153.102/32"]
+  }
+
+  ingress {
+    description = "http traffic from home"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["102.129.153.102/32"]
   }
 
   egress {
@@ -46,6 +54,7 @@ resource "aws_instance" "public" {
   vpc_security_group_ids      = [aws_security_group.public.id]
   key_name                    = "main"
   associate_public_ip_address = true
+  user_data                   = file("user-data.sh")
 
   tags = {
     Name = "${var.env_code}-public"
