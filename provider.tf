@@ -8,9 +8,10 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "terraform-remote-state-17171"
-    key = "terraform.tfstate"
-    region = "us-west-2"
+    bucket         = "terraform-remote-state-17171"
+    key            = "terraform.tfstate"
+    region         = "us-west-2"
+    dynamodb_table = "terraform-remote-state"
   }
 
   required_version = ">=1.2.0"
