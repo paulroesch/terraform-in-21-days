@@ -24,15 +24,7 @@ resource "aws_security_group" "public" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["102.129.153.134/32"]
-  }
-
-  ingress {
-    description = "http traffic from home"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["102.129.153.134/32"]
+    cidr_blocks = ["143.244.34.198/32"]
   }
 
   egress {
@@ -54,7 +46,6 @@ resource "aws_instance" "public" {
   vpc_security_group_ids      = [aws_security_group.public.id]
   key_name                    = "main"
   associate_public_ip_address = true
-  user_data                   = file("user-data.sh")
 
   tags = {
     Name = "${var.env_code}-public"
@@ -74,6 +65,14 @@ resource "aws_security_group" "private" {
     cidr_blocks = [data.terraform_remote_state.level1.outputs.vpc_cidr]
   }
 
+  ingress {
+    description     = "HTTP from load-balancer"
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.load-balancer.id]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -87,11 +86,14 @@ resource "aws_security_group" "private" {
 }
 
 resource "aws_instance" "private" {
+  count = length(data.terraform_remote_state.level1.outputs.private_subnet_id)
+
   ami                    = data.aws_ami.amazonlinux.id
   instance_type          = "t3.micro"
-  subnet_id              = data.terraform_remote_state.level1.outputs.private_subnet_id[0]
+  subnet_id              = data.terraform_remote_state.level1.outputs.private_subnet_id[count.index]
   vpc_security_group_ids = [aws_security_group.private.id]
   key_name               = "main"
+  user_data              = file("user-data.sh")
 
   tags = {
     Name = "${var.env_code}-private"
@@ -99,10 +101,10 @@ resource "aws_instance" "private" {
 }
 
 
-output "public_ip_addresses" {
+output "public_ec2_public_ip" {
   value = aws_instance.public[*].public_ip
 }
 
-output "private_ip_addresses" {
+output "private_ec2_private_ip" {
   value = aws_instance.private[*].private_ip
 }
