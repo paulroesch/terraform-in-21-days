@@ -6,3 +6,5 @@ module "vpc" {
   private_subnet_cidr = var.private_subnet_cidr
   env_code            = var.env_code
 }
+
+data "aws_region" "this" {}
