@@ -1,6 +1,6 @@
-output "loadbalancer_url" {
-  description = "ELB URL"
-  value       = "http://${module.elb.lb_dns_name}"
+output "website_url" {
+  description = "Website URL"
+  value       = "https://www.appsite-paul.link"
 }
 
 output "aws_region_name" {
